@@ -158,8 +158,7 @@ namespace circbuf
         , m_tail{ other.full() ? npos : other.size() }
         , m_policy{ other.m_policy }
     {
-        std::size_t pos = 0;
-        for (const auto& copy : other) {
+        for (std::size_t pos = 0; const auto& copy : other) {
             m_buffer.construct(pos++, T{ copy });    // copy performed here
         }
     }
@@ -179,8 +178,7 @@ namespace circbuf
         m_tail   = other.full() ? npos : other.size();
         m_policy = other.m_policy;
 
-        std::size_t pos = 0;
-        for (const auto& copy : other) {
+        for (std::size_t pos = 0; const auto& copy : other) {
             m_buffer.construct(pos++, T{ copy });    // copy performed here
         }
 
