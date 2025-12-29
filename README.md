@@ -137,3 +137,12 @@ The underlying buffer can be accessed using the member function `data()`, which 
       assert(copy.policy() != copy2.policy());
   }
   ```
+
+## Building examples and tests
+
+```sh
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug   # or Release
+# ctest --test-dir build/test                   # tests run automatically post-build but you can run it yourself
+```
+
+Run the example built in `build/example` directory. You can also run the test binaries manually in `build/test` directory.
