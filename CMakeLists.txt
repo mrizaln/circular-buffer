@@ -14,8 +14,8 @@ string(
   CIRCBUF_STANDALONE
 )
 
-option(CIRCBUF_BUILD_EXAMPLES "Build example programs" ${CIRCBUF_STANDALONE})
-option(CIRCBUF_BUILD_TESTS "Build example programs" ${CIRCBUF_STANDALONE})
+option(CIRCBUF_BUILD_EXAMPLES "Build examples" ${CIRCBUF_STANDALONE})
+option(CIRCBUF_BUILD_TESTS "Build tests" ${CIRCBUF_STANDALONE})
 
 add_library(circbuf INTERFACE)
 target_include_directories(circbuf INTERFACE include)
