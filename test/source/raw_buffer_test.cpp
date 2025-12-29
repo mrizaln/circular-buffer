@@ -3,7 +3,6 @@
 #include <circbuf/detail/raw_buffer.hpp>
 
 #include <boost/ut.hpp>
-#include <fmt/core.h>
 
 #include <cassert>
 #include <ranges>
@@ -17,11 +16,14 @@ void test()
 {
     using namespace ut::operators;
     using namespace ut::literals;
-    using ut::expect, ut::that;
+    using ut::expect, ut::that, ut::test, ut::log;
+
+    const auto name = std::string{ ut::reflection::type_name<Type>() };
+    log("name: {}\n", name);
 
     Type::reset_active_instance_count();
 
-    "nrvo should happen"_test = [] {
+    test("nrvo should happen" + name) = [] {
         circbuf::detail::RawBuffer<Type> buffer{ 10 };
         for (auto i : rv::iota(0u, 10u)) {
             buffer.construct(i, 10 - i + 1);
@@ -30,14 +32,14 @@ void test()
         for (auto i : rv::iota(0u, 10u)) {
             auto&& value = buffer.at(i);
             expect(that % value.value() == 10 - i + 1);
-            fmt::println("stat: {}", value.stat());
+            ut::log("stat: {}\n", value.stat());
         }
 
         if constexpr (Type::is_movable() or Type::is_copyable()) {
             for (auto i : rv::iota(0u, 10u)) {
                 auto value = std::move(buffer.at(i));
                 expect(that % value.value() == 10 - i + 1);
-                expect(that % value.stat().nocopy() or not Type::s_movable) << fmt::format(
+                expect(that % value.stat().nocopy() or not Type::s_movable) << std::format(
                     "copy shouldn't be made on '{}': {}", ut::reflection::type_name<Type>(), value.stat()
                 );
                 buffer.destroy(i);
@@ -49,7 +51,7 @@ void test()
         }
     };
 
-    "unbalanced constructor/destructor means there is a bug in the code"_test = [] {
+    test("unbalanced constructor/destructor means there is a bug in the code" + name) = [] {
         expect(Type::active_instance_count() == 0_i) << "Unbalanced ctor/dtor detected!";
     };
 }

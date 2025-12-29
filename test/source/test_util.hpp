@@ -1,14 +1,12 @@
 #pragma once
 
-#include <fmt/core.h>
-#include <fmt/ranges.h>
-#include <fmt/std.h>
-
 #include <atomic>
 #include <concepts>
+#include <format>
 #include <limits>
 #include <ostream>
 #include <ranges>
+#include <utility>
 
 namespace test_util
 {
@@ -41,25 +39,9 @@ namespace test_util
         bool        defaulted() const { return m_defaulted; }
         bool        nomove() const { return movecount() == 0; }
         bool        nocopy() const { return copycount() == 0; }
-
-        // for <fmt>
-        friend auto format_as(const ClassStatCounter& stat)
-        {
-            return fmt::format(
-                "{{ [d]: {}, [&&]: {}, [&]: {}, [=&&]: {}, [=&]: {} }}",
-                stat.m_defaulted,
-                stat.m_move_ctor_count,
-                stat.m_copy_ctor_count,
-                stat.m_move_assign_count,
-                stat.m_copy_assign_count
-            );
-        }
-
-        friend std::ostream& operator<<(std::ostream& os, const ClassStatCounter& csc)
-        {
-            return os << format_as(csc);
-        }
     };
+
+    inline std::ostream& operator<<(std::ostream& os, const test_util::ClassStatCounter& stat);
 
     template <
         bool DefaultConstructible,
@@ -246,4 +228,26 @@ namespace test_util
         namespace rv = std::views;
         return rr::equal(actual | rv::transform(&Type::value), expected);
     }
+}
+
+template <>
+struct std::formatter<test_util::ClassStatCounter> : std::formatter<std::string_view>
+{
+    constexpr auto format(const test_util::ClassStatCounter& stat, auto& ctx) const
+    {
+        return std::format_to(
+            ctx.out(),
+            "{{ [d]: {}, [&&]: {}, [&]: {}, [=&&]: {}, [=&]: {} }}",
+            stat.m_defaulted,
+            stat.m_move_ctor_count,
+            stat.m_copy_ctor_count,
+            stat.m_move_assign_count,
+            stat.m_copy_assign_count
+        );
+    }
+};
+
+std::ostream& test_util::operator<<(std::ostream& os, const test_util::ClassStatCounter& stat)
+{
+    return os << std::format("{}", stat);
 }
